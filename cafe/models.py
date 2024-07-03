@@ -1,12 +1,13 @@
-from django.db import models
+from django.db import models # type:ignore
+from django.contrib.auth.models import User # type:ignore
 
 
-class User(models.Model):
-    username = models.CharField(max_length=255, primary_key=True)
-    full_name = models.CharField(max_length=255)
-    email = models.CharField(max_length=255)
-    password = models.CharField(max_length=255)
-    phone_number = models.IntegerField()
+class Costumer(models.Model):
+    user = models.OneToOneField(User,on_delete=models.CASCADE,null=True,blank=True)
+    full_name = models.CharField(max_length=255,null=True)
+    email = models.CharField(max_length=255,null=True)
+    password = models.CharField(max_length=255,null=True)
+    phone_number = models.IntegerField(null=True)
 
     def __str__(self):
         return self.username
@@ -40,14 +41,19 @@ class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     purchase_amount = models.IntegerField()
     type = models.BinaryField(max_length=1)
+    date_orderd=models.DateTimeField(auto_now_add=True)
+
 
     def __str__(self):
         return str(self.order_id)
 
 
 class OrdersProduct(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,on_delete=models.SET_NULL,blank=True,null=True)
+    order = models.ForeignKey(Order,on_delete=models.SET_NULL,blank=True,null=True)
+    quantity = models.IntegerField(default=0,blank=True,null=True)
+
+    date_aded=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'Order {self.order.order_id} - Product {self.product.name}'
