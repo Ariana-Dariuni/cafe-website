@@ -1,55 +1,40 @@
-from django.shortcuts import render , redirect # type: ignore
-from django.contrib.auth.forms import UserCreationForm # type: ignore
-from django.contrib import messages # type: ignore
-from django.contrib.auth.models import User # type: ignore
-from django.contrib.auth import authenticate, login, logout # type: ignore
+from django.shortcuts import render, redirect # type:ignore
+from django.contrib.auth import authenticate, login, logout # type:ignore
+from django.contrib import messages # type:ignore
+from django.contrib.auth.forms import UserCreationForm # type:ignore
 
-def home(request):
-    return render(request, 'cafe/home.html' )
-
-def loginPage(request):
-
-    page = 'login'
-
-    if request.user.is_authenticated:
-        return redirect('home')
-    
-    if request.method =='POST':
-        username = request.POST.get('username').lower()
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
         password = request.POST.get('password')
-
-        try:
-            user = User.object.get(username=username)
-        except:
-            messages.error(request, 'User does not exist')
-
+        
+        if username == 'admin' and password == 'admin':
+            return redirect('management')
+        
         user = authenticate(request, username=username, password=password)
-
         if user is not None:
             login(request, user)
             return redirect('home')
         else:
-            messages.error(request, 'Username or password does not exist')
+            messages.error(request, 'Invalid username or password.')
+    
+    return render(request, 'cafe/login.html')
 
-    context = {'page': page}
-    return render(request, 'cafe/login_register.html', context)
-
-def logoutUser(request):
-    logout(request)
-    return redirect('home')
-
-def registerPage(request):
-    form = UserCreationForm()
+def Register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False) 
-            user.username = user.username.lower()
-            user.save()
-            login(request, user)
-            return redirect('home')
-        else:
-            messages.error(request, 'An error Occured during registration')
+            form.save()
+            messages.success(request, 'Account created successfully. You can now log in.')
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'cafe/register.html', {'form': form})
 
-    context = {'form':form}
-    return render(request, 'cafe/login_register.html', context)
+def logout_view(request):
+    logout(request)
+    messages.success(request, 'You have successfully logged out.')
+    return redirect('login')
+
+def Management(request):
+    return render(request, 'cafe/management.html')
