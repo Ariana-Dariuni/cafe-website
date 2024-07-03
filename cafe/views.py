@@ -3,6 +3,10 @@ from django.contrib.auth import authenticate, login, logout # type:ignore
 from django.contrib import messages # type:ignore
 from django.contrib.auth.forms import UserCreationForm # type:ignore
 
+
+def home(request):
+    return render(request, 'cafe/home.html' )
+
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
